@@ -1,10 +1,13 @@
 name: Daily Horizon Summary
 
+concurrency:
+  group: horizon-daily
+  cancel-in-progress: false
+
 on:
   schedule:
-    # GitHub scheduled workflows use UTC. 20:00 UTC is 04:00 Asia/Shanghai;
-    # this intentionally runs early to offset the observed schedule delay.
-    - cron: '0 23 * * *'
+    # GitHub scheduled workflows use UTC. 14:00 UTC is 06:00 PST / 07:00 PDT.
+    - cron: '0 14 * * *'
   workflow_dispatch:      # Allow manual trigger
 
 jobs:
@@ -28,7 +31,7 @@ jobs:
           version: "0.11.26"
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --extra openbb
 
       - name: Prepare GitHub Actions config
         run: cp data/config.github.json data/config.json
@@ -43,7 +46,8 @@ jobs:
           LWN_KEY: ${{ secrets.LWN_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           HORIZON_WEBHOOK_URL: ${{ secrets.HORIZON_WEBHOOK_URL }}
-        run: uv run horizon --hours 24
+          GITHUB_TOKEN: ${{ github.token }}
+        run: uv run horizon --hours 36
 
       - name: Set current date as environment variable
         run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
@@ -57,3 +61,13 @@ jobs:
           commit_message: "📝 Daily Summary: ${{ env.DATE }}"
           publish_branch: gh-pages
           enable_jekyll: true
+
+      - name: Publish Obsidian briefings
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./data/summaries
+          keep_files: true
+          commit_message: "🗂️ Obsidian briefings: ${{ env.DATE }}"
+          publish_branch: briefings
+          enable_jekyll: false
