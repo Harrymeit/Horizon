@@ -1,5 +1,8 @@
 name: Daily Horizon Summary
 
+env:
+  TZ: America/Los_Angeles
+
 concurrency:
   group: horizon-daily
   cancel-in-progress: false
