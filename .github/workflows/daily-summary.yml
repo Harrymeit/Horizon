@@ -6,8 +6,9 @@ concurrency:
 
 on:
   schedule:
-    # GitHub scheduled workflows use UTC. 14:00 UTC is 06:00 PST / 07:00 PDT.
-    - cron: '0 14 * * *'
+    # Run after the top-of-hour Actions traffic spike and follow DST automatically.
+    - cron: '17 7 * * *'
+      timezone: 'America/Los_Angeles'
   workflow_dispatch:      # Allow manual trigger
 
 jobs:
