@@ -34,6 +34,9 @@ jobs:
         with:
           version: "0.11.26"
 
+      - name: Set runner timezone
+        run: sudo timedatectl set-timezone America/Los_Angeles
+
       - name: Install dependencies
         run: uv sync --extra openbb
 
